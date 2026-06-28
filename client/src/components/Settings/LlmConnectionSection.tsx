@@ -92,6 +92,7 @@ export default function LlmConnectionSection(): React.ReactElement {
           <label className="block text-sm font-medium mb-1.5 text-content-secondary">{t('settings.aiParsing.model')}</label>
           <input
             type="text"
+            autoComplete="off"
             value={model}
             onChange={e => setModel(e.target.value)}
             placeholder="qwen3:8b"
@@ -104,6 +105,7 @@ export default function LlmConnectionSection(): React.ReactElement {
             <label className="block text-sm font-medium mb-1.5 text-content-secondary">{t('settings.aiParsing.baseUrl')}</label>
             <input
               type="url"
+              autoComplete="off"
               value={baseUrl}
               onChange={e => setBaseUrl(e.target.value)}
               placeholder="http://localhost:11434"

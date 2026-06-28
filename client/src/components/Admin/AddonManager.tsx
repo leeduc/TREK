@@ -435,7 +435,7 @@ function LlmParsingConfig({ addon }: { addon: Addon }) {
           {provider !== 'anthropic' && (
             <label className="block">
               <span className={labelCls}>Base URL</span>
-              <input className={fieldCls} value={baseUrl} onChange={e => setBaseUrl(e.target.value)} onBlur={loadModels} placeholder={provider === 'local' ? 'http://localhost:11434/v1' : 'https://api.openai.com/v1'} />
+              <input type="url" autoComplete="off" className={fieldCls} value={baseUrl} onChange={e => setBaseUrl(e.target.value)} onBlur={loadModels} placeholder={provider === 'local' ? 'http://localhost:11434/v1' : 'https://api.openai.com/v1'} />
             </label>
           )}
           <label className="block">
@@ -451,7 +451,7 @@ function LlmParsingConfig({ addon }: { addon: Addon }) {
         <section className="space-y-3">
           <div className={sectionCls}>Model</div>
           <label className="block">
-            <input className={fieldCls} value={model} onChange={e => setModel(e.target.value)} placeholder={provider === 'anthropic' ? 'claude-opus-4-8' : provider === 'openai' ? 'gpt-4o' : 'select or pull below'} />
+            <input autoComplete="off" className={fieldCls} value={model} onChange={e => setModel(e.target.value)} placeholder={provider === 'anthropic' ? 'claude-opus-4-8' : provider === 'openai' ? 'gpt-4o' : 'select or pull below'} />
           </label>
 
           {/* Local model management (Ollama) */}
