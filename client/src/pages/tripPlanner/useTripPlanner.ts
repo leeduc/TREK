@@ -6,10 +6,8 @@ import { useSettingsStore } from '../../store/settingsStore'
 import { getCached, fetchPhoto } from '../../services/photoService'
 import { useToast } from '../../components/shared/Toast'
 import { Map, Ticket, PackageCheck, Wallet, FolderOpen, Users, Train } from 'lucide-react'
-import { useTranslation } from '../../i18n'
-import { addonsApi, accommodationsApi, authApi, tripsApi, assignmentsApi, healthApi, airtrailApi, mapsApi, placesApi } from '../../api/client'
-import { parsedItemToDraft, isTransportItem, type BookingReviewDraft } from '../../components/Planner/parsedItemToDraft'
-import type { BookingImportPreviewItem } from '@trek/shared'
+import { useTranslation, translateApiError } from '../../i18n'
+import { addonsApi, accommodationsApi, authApi, tripsApi, assignmentsApi, healthApi, airtrailApi } from '../../api/client'
 import { accommodationRepo } from '../../repo/accommodationRepo'
 import { offlineDb, getImportFiles, deleteImportFiles } from '../../db/offlineDb'
 import { useBackgroundTasksStore } from '../../store/backgroundTasksStore'
@@ -74,7 +72,7 @@ export function useTripPlanner() {
 
   const loadAccommodations = useCallback(() => {
     if (tripId) {
-      accommodationRepo.list(tripId).then(d => setTripAccommodations(d.accommodations || [])).catch(() => {})
+      accommodationRepo.list(tripId).then(d => setTripAccommodations(d.accommodations || [])).catch(() => { })
       tripActions.loadReservations(tripId)
     }
   }, [tripId])
@@ -85,10 +83,10 @@ export function useTripPlanner() {
       data.addons.forEach(a => { map[a.id] = true })
       setEnabledAddons({ packing: !!map.packing, budget: !!map.budget, documents: !!map.documents, collab: !!map.collab })
       if (data.collabFeatures) setCollabFeatures(data.collabFeatures)
-    }).catch(() => {})
+    }).catch(() => { })
     authApi.getAppConfig().then(config => {
       if (config.allowed_file_types) setAllowedFileTypes(config.allowed_file_types)
-    }).catch(() => {})
+    }).catch(() => { })
   }, [])
 
   const TRANSPORT_TYPES = new Set(['flight', 'train', 'bus', 'car', 'taxi', 'bicycle', 'cruise', 'ferry', 'transport_other'])
@@ -155,7 +153,7 @@ export function useTripPlanner() {
     airtrailSyncedRef.current = tripId
     airtrailApi.sync()
       .then(r => { if (r && r.changed > 0) tripActions.loadReservations(tripId) })
-      .catch(() => {})
+      .catch(() => { })
   }, [airTrailAvailable, tripId, tripActions])
   const [bookingForAssignmentId, setBookingForAssignmentId] = useState<number | null>(null)
   const [showTransportModal, setShowTransportModal] = useState<boolean>(false)
@@ -205,7 +203,7 @@ export function useTripPlanner() {
   }, [trip, places])
 
   useEffect(() => {
-    healthApi.features().then(f => setBookingImportAvailable(f.bookingImport)).catch(() => {})
+    healthApi.features().then(f => setBookingImportAvailable(f.bookingImport)).catch(() => { })
   }, [])
 
   const connectionsStorageKey = tripId ? `trek:visible-connections:${tripId}` : null
@@ -257,12 +255,12 @@ export function useTripPlanner() {
       if (!navigator.onLine) {
         offlineDb.tripMembers.where('tripId').equals(Number(tripId)).toArray()
           .then(rows => setTripMembers(rows))
-          .catch(() => {})
+          .catch(() => { })
       } else {
         tripsApi.getMembers(tripId).then(d => {
           const all = [d.owner, ...(d.members || [])].filter(Boolean)
           setTripMembers(all)
-        }).catch(() => {})
+        }).catch(() => { })
       }
     }
   }, [tripId])
@@ -425,7 +423,7 @@ export function useTripPlanner() {
           const fd = new FormData()
           fd.append('file', file)
           fd.append('place_id', String(editingPlace.id))
-          try { await tripActions.addFile(tripId, fd) } catch { toast.error(t('files.uploadError')) }
+          try { await tripActions.addFile(tripId, fd) } catch (err) { toast.error(translateApiError(t, err, 'files.uploadError')) }
         }
       }
       toast.success(t('trip.toast.placeUpdated'))
@@ -436,7 +434,7 @@ export function useTripPlanner() {
           const fd = new FormData()
           fd.append('file', file)
           fd.append('place_id', String(place.id))
-          try { await tripActions.addFile(tripId, fd) } catch { toast.error(t('files.uploadError')) }
+          try { await tripActions.addFile(tripId, fd) } catch (err) { toast.error(translateApiError(t, err, 'files.uploadError')) }
         }
       }
       toast.success(t('trip.toast.placeAdded'))
@@ -621,7 +619,7 @@ export function useTripPlanner() {
         setShowReservationModal(false)
         setEditingReservation(null)
         if (data.type === 'hotel') {
-          accommodationsApi.list(tripId).then(d => setTripAccommodations(d.accommodations || [])).catch(() => {})
+          accommodationsApi.list(tripId).then(d => setTripAccommodations(d.accommodations || [])).catch(() => { })
         }
         return r
       } else {
@@ -633,7 +631,7 @@ export function useTripPlanner() {
         if ((data as Record<string, unknown>).create_budget_entry) await tripActions.loadBudgetItems?.(tripId)
         // Refresh accommodations if hotel was created
         if (data.type === 'hotel') {
-          accommodationsApi.list(tripId).then(d => setTripAccommodations(d.accommodations || [])).catch(() => {})
+          accommodationsApi.list(tripId).then(d => setTripAccommodations(d.accommodations || [])).catch(() => { })
         }
         return r
       }
@@ -667,7 +665,7 @@ export function useTripPlanner() {
       await tripActions.deleteReservation(tripId, id)
       toast.success(t('trip.toast.deleted'))
       // Refresh accommodations in case a hotel booking was deleted
-      accommodationsApi.list(tripId).then(d => setTripAccommodations(d.accommodations || [])).catch(() => {})
+      accommodationsApi.list(tripId).then(d => setTripAccommodations(d.accommodations || [])).catch(() => { })
     }
     catch (err: unknown) { toast.error(err instanceof Error ? err.message : t('common.unknownError')) }
   }
@@ -767,7 +765,7 @@ export function useTripPlanner() {
     setImportReviewActive(false)
     setShowReservationModal(false); setEditingReservation(null); setReservationPrefill(null)
     setShowTransportModal(false); setEditingTransport(null); setTransportPrefill(null); setTransportModalDayId(null)
-    accommodationsApi.list(tripId).then(d => setTripAccommodations(d.accommodations || [])).catch(() => {})
+    accommodationsApi.list(tripId).then(d => setTripAccommodations(d.accommodations || [])).catch(() => { })
     // Imported bookings auto-create their linked costs server-side, but the saving client
     // suppresses its own budget:created echo (X-Socket-Id) — so reload the budget items here
     // to surface those expenses without a manual page refresh.
